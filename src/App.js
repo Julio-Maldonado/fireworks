@@ -20,19 +20,13 @@ class App extends React.Component {
     // window.addEventListener('touchmove', function() {});
     document.addEventListener('touchmove', function(e) { e.preventDefault(); }, { passive:false });
     // document.body.addEventListener('scroll', this.preventMotion, false);
-    this.canvas.width = 1000;
-    this.canvas.height = 800;
-    this.ctx = this.canvas.getContext('2d');
-    this.ctx.lineJoin = 'round';
-    this.ctx.lineCap = 'round';
-    this.ctx.lineWidth = 5;
-    // this.updateCanvas()
+    // this.canvas.width = 1000;
+    // this.canvas.height = 800;
+    // this.ctx = this.canvas.getContext('2d');
+    // this.ctx.lineJoin = 'round';
+    // this.ctx.lineCap = 'round';
+    // this.ctx.lineWidth = 5;
   }
-
-//   updateCanvas() {
-//     const ctx = this.canvas.getContext('2d');
-//     ctx.fillRect(0,0, 1000, 1000);
-// }
 
   onMouseDown = (e) => { 
     this.sparklerOn = true
@@ -110,14 +104,14 @@ class App extends React.Component {
         path: [...this.state.path, {x: e.pageX, y: e.pageY}]
       })
 
-      const { offsetX, offsetY } = e;
-      const offSetData = { offsetX, offsetY }
-      const positionData = {
-        start: { ...this.prevPos },
-        stop: { ...offSetData },
-      }
-      this.line = this.line.concat(positionData)
-      this.paint(this.prevPos, offSetData, this.userStrokeStyle);
+      // const { offsetX, offsetY } = e;
+      // const offSetData = { offsetX, offsetY }
+      // const positionData = {
+      //   start: { ...this.prevPos },
+      //   stop: { ...offSetData },
+      // }
+      // this.line = this.line.concat(positionData)
+      // this.paint(this.prevPos, offSetData, this.userStrokeStyle);
     }
   }
 
@@ -167,12 +161,10 @@ class App extends React.Component {
             )
           })
         }
-        <canvas
-          style={{width: '100%', height: '100%'}}
-          ref={(ref) => (this.canvas = ref)}
+        {/* <canvas ref={(ref) => (this.canvas = ref)}
           onMouseDown={(e) => this.onMouseDown(e)}
           onMouseMove={(e) => this.onMouseMove(e)}
-          onMouseUp={() => this.onMouseUp()} />
+          onMouseUp={() => this.onMouseUp()} /> */}
       </div>
     )
   }
