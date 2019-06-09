@@ -1,146 +1,149 @@
 import React from 'react'
-// import logo from './logo.svg'
 import './App.css'
-
-const RED = 240
-const GREEN = 230
-const BLUE = 140
-// sparkler
-
-let decimalToHex = (num) => {
-  // if num < 16, then append a 0 to properly convert to rgb value
-  if ((num/16) === 0)
-    return '0' + num.toString(16)
-  return num.toString(16)
-}
-
-let rgbDecTorgbHex = (num1, num2, num3) => {
-  return decimalToHex(num1) + decimalToHex(num2) + decimalToHex(num3)
-}
-
-/*
-let newSparkle = {
-  x: e.pageX,
-  y: e.pageY,
-  color: {r: 252, g: 0, b: 0},
-  key: this.counter
-}
-*/
+import * as colors from './constants'
+import {rgbDecTorgbHex} from './helperFunctions'
+// import {Polyline} from '../node_modules/react-polyline/src/index'
 
 class App extends React.Component {
-  state = {
-    sparkles: [],
-    x: 0,
-    y: 0
+  state = { sparkles: [], path: [] }
+
+  
+  counter = 0
+  isPainting = false
+  line = []
+  prevPos = {offsetX: 0, offsetY: 0}
+
+  componentDidMount() {
+    setInterval(this.update, 50)
+    // document.body.addEventListener('touchstart', this.preventMotion, false);
+    // document.body.addEventListener('touchmove', function() {});
+    // window.addEventListener('touchmove', function() {});
+    document.addEventListener('touchmove', function(e) { e.preventDefault(); }, { passive:false });
+    // document.body.addEventListener('scroll', this.preventMotion, false);
+    this.canvas.width = 1000;
+    this.canvas.height = 800;
+    this.ctx = this.canvas.getContext('2d');
+    this.ctx.lineJoin = 'round';
+    this.ctx.lineCap = 'round';
+    this.ctx.lineWidth = 5;
+    // this.updateCanvas()
   }
 
-  counter = 0
+//   updateCanvas() {
+//     const ctx = this.canvas.getContext('2d');
+//     ctx.fillRect(0,0, 1000, 1000);
+// }
+
+  onMouseDown = (e) => { 
+    this.sparklerOn = true
+    const {offsetX, offsetY} = e
+    this.isPainting = true
+    this.prevPos = {offsetX, offsetY}
+    this.onMouseMove(e)
+  }
+
+  onMouseUp = () => { this.sparklerOn = false }
 
   update = () => {
-    let updatedSparkles = this.state.sparkles.map((sparkleArray) => {
-      let counter = 0
+    let updatedSparkles = []
+    this.state.sparkles.forEach((sparkleArray) => {
       let updatedSparklesArray = []
       sparkleArray.forEach((sparkle) => {
-        if (counter < 5) {
-          counter++
-          if (Math.floor(Math.random() * 2) === 0)
-            sparkle.x += Math.floor(Math.random() * 3) + 2
-          else
-            sparkle.x -= Math.floor(Math.random() * 3) + 2
-          
-          if (Math.floor(Math.random() * 2) === 0)
-            sparkle.y += Math.floor(Math.random() * 3) + 2
-          else
-            sparkle.y -= Math.floor(Math.random() * 3) + 2
-
-        } else {
-          if (Math.floor(Math.random() * 2) === 0)
-            sparkle.x += Math.floor(Math.random() * 3) + 2
-          else
-            sparkle.x -= Math.floor(Math.random() * 3) + 2
-
-          if (Math.floor(Math.random() * 2) === 0)
-            sparkle.y += Math.floor(Math.random() * 3) + 2
-          else
-            sparkle.y -= Math.floor(Math.random() * 3) + 2
-
+        if (sparkle.quadrant === 1) {         // top right 1
+          sparkle.x += Math.floor(Math.random() * 3) + 5
+          sparkle.y += Math.floor(Math.random() * 3) + 2
+        } else if (sparkle.quadrant === 2) {  // top right 2
+          sparkle.x += Math.floor(Math.random() * 3) + 2
+          sparkle.y += Math.floor(Math.random() * 3) + 5
+        } else if (sparkle.quadrant === 3) {  // top left 1
+          sparkle.x -= Math.floor(Math.random() * 3) + 5
+          sparkle.y += Math.floor(Math.random() * 3) + 2
+        } else if (sparkle.quadrant === 4) {  // top left 2
+          sparkle.x -= Math.floor(Math.random() * 3) + 2
+          sparkle.y += Math.floor(Math.random() * 3) + 5
+        } else if (sparkle.quadrant === 5) {  // bottom left 1
+          sparkle.x -= Math.floor(Math.random() * 3) + 5
+          sparkle.y -= Math.floor(Math.random() * 3) + 2
+        } else if (sparkle.quadrant === 6) {  // bottom left 2
+          sparkle.x -= Math.floor(Math.random() * 3) + 2
+          sparkle.y -= Math.floor(Math.random() * 3) + 5
+        } else if (sparkle.quadrant === 7) {  // bottom right 1
+          sparkle.x += Math.floor(Math.random() * 3) + 5
+          sparkle.y -= Math.floor(Math.random() * 3) + 2
+        } else {                              // bottom right 2
+          sparkle.x += Math.floor(Math.random() * 3) + 2
+          sparkle.y -= Math.floor(Math.random() * 3) + 5
         }
-        if (sparkle.counter !== sparkle.length)
+        sparkle.color.r -= 10
+        sparkle.color.g -= 10
+        sparkle.color.b -= 5
+        
+        if (sparkle.counter++ !== sparkle.length)
           updatedSparklesArray.push(sparkle)
-        sparkle.counter++
       })
-      return updatedSparklesArray
+      if (updatedSparklesArray.length !== 0)
+        updatedSparkles.push(updatedSparklesArray)
     })
     this.setState({ sparkles: updatedSparkles})
   }
 
-  componentDidMount() {
-    console.log(window.innerHeight)
-    console.log(window.innerWidth)
-    setInterval(this.update, 50)
-  }
-
-  onMouseDown = () => {
-    this.sparklerOn = true
-  }
+  prevPos = { offsetX: 0, offsetY: 0 };
 
   onMouseMove = (e) => {
     if (this.sparklerOn === true) {
       let sparkleArray = []
-      for (let i = 0; i < 5; i++) {
+      console.log(e.type)
+      for (let i = 0; i < 32; i++) {
         let newSparkleParticle = {
-          x: e.pageX + i,
-          y: e.pageY + i,
-          color: {r: RED, g: GREEN, b: BLUE},
-          length: Math.floor(Math.random() * 15) + 10,
+          x: e.type === 'mousedown' || e.type === 'mousemove' ? e.pageX : e.touches[0].pageX,
+          y: e.type === 'mousedown' || e.type === 'mousemove' ? e.pageY : e.touches[0].pageY,
+          color: {r: colors.RED, g: colors.GREEN, b: colors.BLUE},
+          length: Math.floor(Math.random() * 10) + 5,
           counter: 0,
-          key: this.counter
+          key: this.counter++,
+          quadrant: i % 8 + 1
         }
         sparkleArray.push(newSparkleParticle)
-        this.counter++
-      }
-      for (let i = 1; i < 5; i++) {
-        let newSparkleParticle = {
-          x: e.pageX - i,
-          y: e.pageY - i,
-          color: {r: RED, g: GREEN, b: BLUE},
-          length: Math.floor(Math.random() * 15) + 10,
-          counter: 0,
-          key: this.counter
-        }
-        sparkleArray.push(newSparkleParticle)
-        this.counter++
       }
       this.setState({
-        x: e.pageX,
-        y: e.pageY,
-        sparkles: [...this.state.sparkles, sparkleArray]
+        sparkles: [...this.state.sparkles, sparkleArray],
+        path: [...this.state.path, {x: e.pageX, y: e.pageY}]
       })
+
+      const { offsetX, offsetY } = e;
+      const offSetData = { offsetX, offsetY }
+      const positionData = {
+        start: { ...this.prevPos },
+        stop: { ...offSetData },
+      }
+      this.line = this.line.concat(positionData)
+      this.paint(this.prevPos, offSetData, this.userStrokeStyle);
     }
   }
 
-  onMouseUp = () => {
-    this.sparklerOn = false
+  paint(prevPos, currPos, strokeStyle) {
+    const { offsetX, offsetY } = currPos;
+    const { offsetX: x, offsetY: y } = prevPos;
+
+    this.ctx.beginPath();
+    this.ctx.strokeStyle = strokeStyle;
+    // Move the the prevPosition of the mouse
+    this.ctx.moveTo(x, y);
+    // Draw a line to the current position of the mouse
+    this.ctx.lineTo(offsetX, offsetY);
+    // Visualize the line using the strokeStyle
+    this.ctx.stroke();
+    this.prevPos = { offsetX, offsetY };
   }
 
   render () {
     return (
       <div className="App"
-        onMouseDown={() => this.onMouseDown()}
+        onMouseDown={(e) => this.onMouseDown(e)}
         onMouseMove={(e) => this.onMouseMove(e)}
         onMouseUp={() => this.onMouseUp()}
-        onMouseDownCapture={(e) => console.log(e.pageX, e.pageY)} >
-        <div className="App-header">
-          {/* <img src={logo} className="App-logo" alt="logo" />
-          <a
-            className="App-link"
-            href="https://reactjs.org"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Learn React
-          </a> */}
-        </div>
+        onTouchMove={(e) => this.onMouseMove(e)}
+        onTouchStart={(e) => {this.onMouseDown(e)}} >
         {
           this.state.sparkles.map((sparkleArray) => {
             return (
@@ -152,8 +155,8 @@ class App extends React.Component {
                     style={{
                     backgroundColor: `#${color}`,
                     borderRadius: 10,
-                    width: '1%',
-                    height: '1%',
+                    width: '0.2%',
+                    height: '0.2%',
                     color: '#fff',
                     position: 'absolute',
                     left: sparkle.x,
@@ -164,6 +167,12 @@ class App extends React.Component {
             )
           })
         }
+        <canvas
+          style={{width: '100%', height: '100%'}}
+          ref={(ref) => (this.canvas = ref)}
+          onMouseDown={(e) => this.onMouseDown(e)}
+          onMouseMove={(e) => this.onMouseMove(e)}
+          onMouseUp={() => this.onMouseUp()} />
       </div>
     )
   }
