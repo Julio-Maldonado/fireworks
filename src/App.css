@@ -9,14 +9,15 @@
 }
 
 .App-header {
-  background-color: #282c34;
+  /* background-color: #282c00; */
   min-height: 100vh;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   font-size: calc(10px + 2vmin);
-  color: white;
+  background-image: url("assets/astronomy_dark_evening_galaxy_nature_night_night_sky_outdoors-1562859.jpg");
+  /* color: white; */
 }
 
 .App-link {
