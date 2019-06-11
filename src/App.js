@@ -1,110 +1,28 @@
 import React from 'react'
 import './App.css'
-import * as colors from './constants'
 import {rgbDecTorgbHex} from './helperFunctions'
-import {List, Map} from 'immutable'
+import Slider from 'react-input-slider'
 
-class DrawArea extends React.Component {
-  state = {
-    lines: new List(),
-    isDrawing: false
-  }
-
-  update = () => {
-    let {lines} = this.state
-    if (lines.size !== 0) {
-      this.setState(prevState => ({
-        lines: this.state.lines.updateIn([0], line => line.delete(0))
-      }))
-      if (lines.get(0).size === 0)
-        this.setState({ lines: lines.delete(0)})
-    }
-  }
-
-  componentDidMount() {
-    document.addEventListener("mouseup", this.handleMouseUp)
-    setInterval(this.update, 20)
-  }
-
-  componentWillUnmount() {
-    document.removeEventListener("mouseup", this.handleMouseUp)
-  }
-
-  handleMouseDown = (e) => {
-    if (e.button === 0 || e.type === 'touchstart') {
-      const point = this.relativeCoordinatesForEvent(e)
-
-      this.setState(prevState => ({
-        lines: this.state.lines.push(new List([point])),
-        isDrawing: true
-      }))
-    }
-  }
-
-  handleMouseMove = (e) => {
-    if (this.state.isDrawing) {
-      const point = this.relativeCoordinatesForEvent(e)
-      let {lines} = this.state
-      if (lines.size !== 0)
-        this.setState(prevState =>  ({
-          lines: lines.updateIn([lines.size - 1], line => line.push(point))
-        })) 
-    }
-  }
-
-  handleMouseUp = () => {
-    this.setState({ isDrawing: false })
-  }
-
-  relativeCoordinatesForEvent = (e) => {
-    const boundingRect = this.refs.drawArea.getBoundingClientRect()
-    return new Map({
-      x: e.type === 'mousedown' || e.type === 'mousemove' ? e.clientX - boundingRect.left : e.touches[0].pageX - boundingRect.left,
-      y: e.type === 'mousedown' || e.type === 'mousemove' ? e.clientY - boundingRect.top : e.touches[0].pageY - boundingRect.top,
-    })
-  }
-
-  render() {
-    return (
-      <div
-        className="drawArea"
-        ref="drawArea"
-        onMouseDown={this.handleMouseDown}
-        onMouseMove={this.handleMouseMove}
-        onTouchMove={this.handleMouseMove}
-        onTouchStart={this.handleMouseDown}
-      >
-        <Drawing lines={this.state.lines} />
-      </div>
-    )
-  }
-}
-
-function Drawing({ lines }) {
-  return (
-    <svg className="drawing">
-      {lines.map((line, index) => (
-        <DrawingLine key={index} line={line} />
-      ))}
-    </svg>
-  )
-}
-
-function DrawingLine({ line }) {
-  const pathData = "M " +
-    line
-      .map(p => {
-        return `${p.get('x')} ${p.get('y')}`
-      })
-      .join(" L ")
-
-  return <path className="path" d={pathData} />
-}
-
-class App extends React.Component {
-  state = { sparkles: [], path: [] }
-
+let updateSparkle = (a, b, c, op1, op2, sparkle) => {
+  if (op1)
+    sparkle.x += Math.floor(Math.random() * a) + b
+  else 
+    sparkle.x -= Math.floor(Math.random() * a) + b
   
+  if (op2)
+    sparkle.y += Math.floor(Math.random() * a) + c
+  else
+    sparkle.y -= Math.floor(Math.random() * a) + c
+}
+class App extends React.Component {
+  state = { 
+    sparkles: [], 
+    path: [], 
+    sliderRedX: 240,
+    sliderGreenX: 230,
+    sliderBlueX: 140
+  }
+
   counter = 0
   coordCounter = 0
   isPainting = false
@@ -123,14 +41,6 @@ class App extends React.Component {
     this.sparklerOn = true
     this.onMouseMove(e)
   }
-  
-  relativeCoordinatesForEvent(e) {
-    const boundingRect = this.refs.drawArea.getBoundingClientRect()
-    return new Map({
-      x: e.clientX - boundingRect.left,
-      y: e.clientY - boundingRect.top,
-    })
-  }
 
   onMouseUp = () => { this.sparklerOn = false }
 
@@ -139,34 +49,26 @@ class App extends React.Component {
     this.state.sparkles.forEach((sparkleArray) => {
       let updatedSparklesArray = []
       sparkleArray.forEach((sparkle) => {
-        if (sparkle.quadrant === 1) {         // top right 1
-          sparkle.x += Math.floor(Math.random() * 3) + 5
-          sparkle.y += Math.floor(Math.random() * 3) + 2
-        } else if (sparkle.quadrant === 2) {  // top right 2
-          sparkle.x += Math.floor(Math.random() * 3) + 2
-          sparkle.y += Math.floor(Math.random() * 3) + 5
-        } else if (sparkle.quadrant === 3) {  // top left 1
-          sparkle.x -= Math.floor(Math.random() * 3) + 5
-          sparkle.y += Math.floor(Math.random() * 3) + 2
-        } else if (sparkle.quadrant === 4) {  // top left 2
-          sparkle.x -= Math.floor(Math.random() * 3) + 2
-          sparkle.y += Math.floor(Math.random() * 3) + 5
-        } else if (sparkle.quadrant === 5) {  // bottom left 1
-          sparkle.x -= Math.floor(Math.random() * 3) + 5
-          sparkle.y -= Math.floor(Math.random() * 3) + 2
-        } else if (sparkle.quadrant === 6) {  // bottom left 2
-          sparkle.x -= Math.floor(Math.random() * 3) + 2
-          sparkle.y -= Math.floor(Math.random() * 3) + 5
-        } else if (sparkle.quadrant === 7) {  // bottom right 1
-          sparkle.x += Math.floor(Math.random() * 3) + 5
-          sparkle.y -= Math.floor(Math.random() * 3) + 2
-        } else {                              // bottom right 2
-          sparkle.x += Math.floor(Math.random() * 3) + 2
-          sparkle.y -= Math.floor(Math.random() * 3) + 5
-        }
-        sparkle.color.r -= 10
-        sparkle.color.g -= 10
-        sparkle.color.b -= 5
+        if (sparkle.quadrant === 1)           // top right 1
+          updateSparkle(3, 5, 2, true, true, sparkle)
+        else if (sparkle.quadrant === 2)      // top right 2
+          updateSparkle(3, 2, 5, true, true, sparkle)
+        else if (sparkle.quadrant === 3)      // top left 1
+          updateSparkle(3, 5, 2, false, true, sparkle)
+        else if (sparkle.quadrant === 4)      // top left 2
+          updateSparkle(3, 2, 5, false, true, sparkle)
+        else if (sparkle.quadrant === 5)      // bottom left 1
+          updateSparkle(3, 5, 2, false, false, sparkle)
+        else if (sparkle.quadrant === 6)      // bottom left 2
+          updateSparkle(3, 2, 5, false, false, sparkle)
+        else if (sparkle.quadrant === 7)      // bottom right 1
+          updateSparkle(3, 5, 2, true, false, sparkle)
+        else                                  // bottom right 2
+          updateSparkle(3, 2, 5, true, false, sparkle)
+
+        sparkle.color.r = Math.max(0, sparkle.color.r - 15)
+        sparkle.color.g = Math.max(0, sparkle.color.g - 15)
+        sparkle.color.b = Math.max(0, sparkle.color.b - 15)
         
         if (sparkle.counter++ !== sparkle.length)
           updatedSparklesArray.push(sparkle)
@@ -184,7 +86,7 @@ class App extends React.Component {
         let newSparkleParticle = {
           x: e.type === 'mousedown' || e.type === 'mousemove' ? e.pageX : e.touches[0].pageX,
           y: e.type === 'mousedown' || e.type === 'mousemove' ? e.pageY : e.touches[0].pageY,
-          color: {r: colors.RED, g: colors.GREEN, b: colors.BLUE},
+          color: {r: this.state.sliderRedX, g: this.state.sliderGreenX, b: this.state.sliderBlueX},
           length: Math.floor(Math.random() * 10) + 5,
           counter: 0,
           key: this.counter++,
@@ -232,7 +134,67 @@ class App extends React.Component {
             )
           })
         }
-        <DrawArea />
+        <Slider
+          axis="x"
+          x={this.state.sliderRedX}
+          xmax={255}
+          className="red-slider"
+          onChange={({ x }) => this.setState({sliderRedX: x})}
+          styles={{
+            track: {
+              backgroundColor: 'black'
+            },
+            active: {
+              backgroundColor: 'red'
+            },
+            thumb: {
+              width: 10,
+              height: 10
+            }
+          }}
+        />
+        <br />
+        <Slider
+          axis="x"
+          x={this.state.sliderGreenX}
+          xmax={255}
+          className="green-slider"
+          onChange={({ x }) => this.setState({sliderGreenX: x})}
+          styles={{
+            track: {
+              backgroundColor: 'black'
+            },
+            active: {
+              backgroundColor: 'green'
+            },
+            thumb: {
+              width: 10,
+              height: 10
+            }
+          }}
+        />
+        <br />
+        <Slider
+          axis="x"
+          x={this.state.sliderBlueX}
+          xmax={255}
+          className="blue-slider"
+          onChange={({ x }) => this.setState({sliderBlueX: x})}
+          styles={{
+            track: {
+              backgroundColor: 'black'
+            },
+            active: {
+              backgroundColor: 'blue'
+            },
+            thumb: {
+              width: 10,
+              height: 10
+            }
+          }}
+        />
+        
+        {/* <DrawArea /> */}
       </div>
     )
   }
