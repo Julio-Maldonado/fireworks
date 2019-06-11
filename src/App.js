@@ -14,7 +14,7 @@ class DrawArea extends React.Component {
     let {lines} = this.state
     if (lines.size !== 0) {
       this.setState(prevState => ({
-        lines: prevState.lines.updateIn([0], line => line.delete(0))
+        lines: this.state.lines.updateIn([0], line => line.delete(0))
       }))
       if (lines.get(0).size === 0)
         this.setState({ lines: lines.delete(0)})
@@ -35,7 +35,7 @@ class DrawArea extends React.Component {
       const point = this.relativeCoordinatesForEvent(e)
 
       this.setState(prevState => ({
-        lines: prevState.lines.push(new List([point])),
+        lines: this.state.lines.push(new List([point])),
         isDrawing: true
       }))
     }
@@ -44,10 +44,11 @@ class DrawArea extends React.Component {
   handleMouseMove = (e) => {
     if (this.state.isDrawing) {
       const point = this.relativeCoordinatesForEvent(e)
-    
-      this.setState(prevState =>  ({
-        lines: prevState.lines.updateIn([prevState.lines.size - 1], line => line.push(point))
-      })) 
+      let {lines} = this.state
+      if (lines.size !== 0)
+        this.setState(prevState =>  ({
+          lines: lines.updateIn([lines.size - 1], line => line.push(point))
+        })) 
     }
   }
 
