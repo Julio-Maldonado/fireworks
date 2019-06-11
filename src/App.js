@@ -2,38 +2,133 @@ import React from 'react'
 import './App.css'
 import * as colors from './constants'
 import {rgbDecTorgbHex} from './helperFunctions'
-// import {Polyline} from '../node_modules/react-polyline/src/index'
+import {List, Map} from 'immutable'
+
+class DrawArea extends React.Component {
+  state = {
+    lines: new List(),
+    isDrawing: false
+  }
+
+  update = () => {
+    let {lines} = this.state
+    if (lines.size !== 0) {
+      this.setState(prevState => ({
+        lines: prevState.lines.updateIn([0], line => line.delete(0))
+      }))
+      if (lines.get(0).size === 0)
+        this.setState({ lines: lines.delete(0)})
+    }
+  }
+
+  componentDidMount() {
+    document.addEventListener("mouseup", this.handleMouseUp)
+    setInterval(this.update, 20)
+  }
+
+  componentWillUnmount() {
+    document.removeEventListener("mouseup", this.handleMouseUp)
+  }
+
+  handleMouseDown = (e) => {
+    if (e.button === 0 || e.type === 'touchstart') {
+      const point = this.relativeCoordinatesForEvent(e)
+
+      this.setState(prevState => ({
+        lines: prevState.lines.push(new List([point])),
+        isDrawing: true
+      }))
+    }
+  }
+
+  handleMouseMove = (e) => {
+    if (this.state.isDrawing) {
+      const point = this.relativeCoordinatesForEvent(e)
+    
+      this.setState(prevState =>  ({
+        lines: prevState.lines.updateIn([prevState.lines.size - 1], line => line.push(point))
+      })) 
+    }
+  }
+
+  handleMouseUp = () => {
+    this.setState({ isDrawing: false })
+  }
+
+  relativeCoordinatesForEvent = (e) => {
+    const boundingRect = this.refs.drawArea.getBoundingClientRect()
+    return new Map({
+      x: e.type === 'mousedown' || e.type === 'mousemove' ? e.clientX - boundingRect.left : e.touches[0].pageX - boundingRect.left,
+      y: e.type === 'mousedown' || e.type === 'mousemove' ? e.clientY - boundingRect.top : e.touches[0].pageY - boundingRect.top,
+    })
+  }
+
+  render() {
+    return (
+      <div
+        className="drawArea"
+        ref="drawArea"
+        onMouseDown={this.handleMouseDown}
+        onMouseMove={this.handleMouseMove}
+        onTouchMove={this.handleMouseMove}
+        onTouchStart={this.handleMouseDown}
+      >
+        <Drawing lines={this.state.lines} />
+      </div>
+    )
+  }
+}
+
+function Drawing({ lines }) {
+  return (
+    <svg className="drawing">
+      {lines.map((line, index) => (
+        <DrawingLine key={index} line={line} />
+      ))}
+    </svg>
+  )
+}
+
+function DrawingLine({ line }) {
+  const pathData = "M " +
+    line
+      .map(p => {
+        return `${p.get('x')} ${p.get('y')}`
+      })
+      .join(" L ")
+
+  return <path className="path" d={pathData} />
+}
 
 class App extends React.Component {
   state = { sparkles: [], path: [] }
 
   
   counter = 0
+  coordCounter = 0
   isPainting = false
   line = []
   prevPos = {offsetX: 0, offsetY: 0}
 
   componentDidMount() {
     setInterval(this.update, 50)
-    // document.body.addEventListener('touchstart', this.preventMotion, false);
-    // document.body.addEventListener('touchmove', function() {});
-    // window.addEventListener('touchmove', function() {});
-    document.addEventListener('touchmove', function(e) { e.preventDefault(); }, { passive:false });
-    // document.body.addEventListener('scroll', this.preventMotion, false);
-    // this.canvas.width = 1000;
-    // this.canvas.height = 800;
-    // this.ctx = this.canvas.getContext('2d');
-    // this.ctx.lineJoin = 'round';
-    // this.ctx.lineCap = 'round';
-    // this.ctx.lineWidth = 5;
+    // document.body.addEventListener('touchstart', this.preventMotion, false)
+    // document.body.addEventListener('touchmove', function() {})
+    // window.addEventListener('touchmove', function() {})
+    document.addEventListener('touchmove', function(e) { e.preventDefault() }, { passive:false })
   }
 
   onMouseDown = (e) => { 
     this.sparklerOn = true
-    const {offsetX, offsetY} = e
-    this.isPainting = true
-    this.prevPos = {offsetX, offsetY}
     this.onMouseMove(e)
+  }
+  
+  relativeCoordinatesForEvent(e) {
+    const boundingRect = this.refs.drawArea.getBoundingClientRect()
+    return new Map({
+      x: e.clientX - boundingRect.left,
+      y: e.clientY - boundingRect.top,
+    })
   }
 
   onMouseUp = () => { this.sparklerOn = false }
@@ -81,12 +176,9 @@ class App extends React.Component {
     this.setState({ sparkles: updatedSparkles})
   }
 
-  prevPos = { offsetX: 0, offsetY: 0 };
-
   onMouseMove = (e) => {
     if (this.sparklerOn === true) {
       let sparkleArray = []
-      console.log(e.type)
       for (let i = 0; i < 32; i++) {
         let newSparkleParticle = {
           x: e.type === 'mousedown' || e.type === 'mousemove' ? e.pageX : e.touches[0].pageX,
@@ -101,45 +193,23 @@ class App extends React.Component {
       }
       this.setState({
         sparkles: [...this.state.sparkles, sparkleArray],
-        path: [...this.state.path, {x: e.pageX, y: e.pageY}]
+        path: [...this.state.path, {x: e.pageX, y: e.pageY, key: this.coordCounter++}]
       })
-
-      // const { offsetX, offsetY } = e;
-      // const offSetData = { offsetX, offsetY }
-      // const positionData = {
-      //   start: { ...this.prevPos },
-      //   stop: { ...offSetData },
-      // }
-      // this.line = this.line.concat(positionData)
-      // this.paint(this.prevPos, offSetData, this.userStrokeStyle);
     }
   }
 
-  paint(prevPos, currPos, strokeStyle) {
-    const { offsetX, offsetY } = currPos;
-    const { offsetX: x, offsetY: y } = prevPos;
-
-    this.ctx.beginPath();
-    this.ctx.strokeStyle = strokeStyle;
-    // Move the the prevPosition of the mouse
-    this.ctx.moveTo(x, y);
-    // Draw a line to the current position of the mouse
-    this.ctx.lineTo(offsetX, offsetY);
-    // Visualize the line using the strokeStyle
-    this.ctx.stroke();
-    this.prevPos = { offsetX, offsetY };
-  }
-
   render () {
+    const {sparkles} = this.state
     return (
       <div className="App"
+        ref="drawArea"
         onMouseDown={(e) => this.onMouseDown(e)}
         onMouseMove={(e) => this.onMouseMove(e)}
         onMouseUp={() => this.onMouseUp()}
         onTouchMove={(e) => this.onMouseMove(e)}
         onTouchStart={(e) => {this.onMouseDown(e)}} >
         {
-          this.state.sparkles.map((sparkleArray) => {
+          sparkles.map((sparkleArray) => {
             return (
               sparkleArray.map((sparkle) => {
                 let color = rgbDecTorgbHex(sparkle.color.r, sparkle.color.g, sparkle.color.b)
@@ -161,10 +231,7 @@ class App extends React.Component {
             )
           })
         }
-        {/* <canvas ref={(ref) => (this.canvas = ref)}
-          onMouseDown={(e) => this.onMouseDown(e)}
-          onMouseMove={(e) => this.onMouseMove(e)}
-          onMouseUp={() => this.onMouseUp()} /> */}
+        <DrawArea />
       </div>
     )
   }

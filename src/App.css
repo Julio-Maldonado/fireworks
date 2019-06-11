@@ -12,6 +12,29 @@
   background-image: url("assets/astronomy_dark_evening_galaxy_nature_night_night_sky_outdoors-1562859.jpg");
 }
 
+.drawArea {
+  width: 100vw;
+  height: 100vh;
+  top: 0;
+  left: 0;
+  position: absolute;
+  float: left;
+  /* cursor: progress; */
+}
+
+.path {
+  fill: none;
+  stroke-width: 1vw;
+  stroke: #F0E68C;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+
+.drawing {
+  width: 100%;
+  height: 100%;
+}
+
 @keyframes App-logo-spin {
   from {
     transform: rotate(0deg);
