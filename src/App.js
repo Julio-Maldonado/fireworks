@@ -30,7 +30,7 @@ class App extends React.Component {
   prevPos = {offsetX: 0, offsetY: 0}
 
   componentDidMount() {
-    setInterval(this.update, 75)
+    setInterval(this.update, 60)
     // document.body.addEventListener('touchstart', this.preventMotion, false)
     // document.body.addEventListener('touchmove', function() {})
     // window.addEventListener('touchmove', function() {})
