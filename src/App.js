@@ -20,7 +20,7 @@ class App extends React.Component {
     path: [], 
     sliderRedX: 240,
     sliderGreenX: 230,
-    sliderBlueX: 140
+    sliderBlueX: 240
   }
 
   counter = 0
@@ -148,8 +148,8 @@ class App extends React.Component {
               backgroundColor: 'red'
             },
             thumb: {
-              width: 10,
-              height: 10
+              width: 19,
+              height: 19
             }
           }}
         />
@@ -168,8 +168,8 @@ class App extends React.Component {
               backgroundColor: 'green'
             },
             thumb: {
-              width: 10,
-              height: 10
+              width: 19,
+              height: 19
             }
           }}
         />
@@ -188,8 +188,8 @@ class App extends React.Component {
               backgroundColor: 'blue'
             },
             thumb: {
-              width: 10,
-              height: 10
+              width: 19,
+              height: 19
             }
           }}
         />
