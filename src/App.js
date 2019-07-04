@@ -1,19 +1,21 @@
 import React from 'react'
 import './App.css'
 import {rgbDecTorgbHex} from './helperFunctions'
-import Slider from 'react-input-slider'
+import Sound from 'react-sound'
+import FireworksAudio from './assets/trimmedAudio.mp3'
 
-let updateSparkle = (a, b, c, op1, op2, sparkle) => {
+let updateSparkle = (ax, ay, bx, by, op1, op2, sparkle) => {
   if (op1)
-    sparkle.x += Math.floor(Math.random() * a) + b
+    sparkle.x += Math.floor(Math.random() * ax) + bx
   else 
-    sparkle.x -= Math.floor(Math.random() * a) + b
+    sparkle.x -= Math.floor(Math.random() * ax) + bx
   
   if (op2)
-    sparkle.y += Math.floor(Math.random() * a) + c
+    sparkle.y += Math.floor(Math.random() * ay) + by
   else
-    sparkle.y -= Math.floor(Math.random() * a) + c
+    sparkle.y -= Math.floor(Math.random() * ay) + by
 }
+
 class App extends React.Component {
   state = { 
     sparkles: [], 
@@ -31,10 +33,17 @@ class App extends React.Component {
 
   componentDidMount() {
     setInterval(this.update, 60)
+    this.audio = new Audio(FireworksAudio)
+    this.audio.volume = 0.5
+    this.audio.addEventListener('ended', () => {
+      this.currentTime = 0
+      this.audio.play()
+    }, false)
+    this.audio.play()
     // document.body.addEventListener('touchstart', this.preventMotion, false)
     // document.body.addEventListener('touchmove', function() {})
     // window.addEventListener('touchmove', function() {})
-    document.addEventListener('touchmove', function(e) { e.preventDefault() }, { passive:false })
+    document.addEventListener('touchmove', function(e) { e.preventDefault() }, { passive: false })
   }
 
   onMouseDown = (e) => { 
@@ -48,27 +57,43 @@ class App extends React.Component {
     let updatedSparkles = []
     this.state.sparkles.forEach((sparkleArray) => {
       let updatedSparklesArray = []
-      sparkleArray.forEach((sparkle) => {
+      sparkleArray.forEach((sparkle, i) => {
         if (sparkle.quadrant === 1)           // top right 1
-          updateSparkle(3, 5, 2, true, true, sparkle)
+          updateSparkle(3, 3, 5, 2, true, true, sparkle)
         else if (sparkle.quadrant === 2)      // top right 2
-          updateSparkle(3, 2, 5, true, true, sparkle)
+          updateSparkle(3, 3, 2, 5, true, true, sparkle)
         else if (sparkle.quadrant === 3)      // top left 1
-          updateSparkle(3, 5, 2, false, true, sparkle)
+          updateSparkle(3, 3, 5, 2, false, true, sparkle)
         else if (sparkle.quadrant === 4)      // top left 2
-          updateSparkle(3, 2, 5, false, true, sparkle)
+          updateSparkle(3, 3, 2, 5, false, true, sparkle)
         else if (sparkle.quadrant === 5)      // bottom left 1
-          updateSparkle(3, 5, 2, false, false, sparkle)
+          updateSparkle(3, 3, 5, 2, false, false, sparkle)
         else if (sparkle.quadrant === 6)      // bottom left 2
-          updateSparkle(3, 2, 5, false, false, sparkle)
+          updateSparkle(3, 3, 2, 5, false, false, sparkle)
         else if (sparkle.quadrant === 7)      // bottom right 1
-          updateSparkle(3, 5, 2, true, false, sparkle)
+          updateSparkle(3, 3, 5, 2, true, false, sparkle)
         else                                  // bottom right 2
-          updateSparkle(3, 2, 5, true, false, sparkle)
+          updateSparkle(3, 3, 2, 5, true, false, sparkle)
 
-        sparkle.color.r = Math.max(0, sparkle.color.r - 15)
-        sparkle.color.g = Math.max(0, sparkle.color.g - 15)
-        sparkle.color.b = Math.max(0, sparkle.color.b - 15)
+        if (sparkle.quadrant >= 5 &&
+          sparkle.quadrant <= 6 &&
+          sparkle.counter >= sparkle.length - 6)
+          updateSparkle(4, 4, 0, 3, true, true, sparkle)
+        else if (sparkle.quadrant >= 7 &&
+          sparkle.quadrant <= 8 &&
+          sparkle.counter >= sparkle.length - 6)
+          updateSparkle(4, 4, 0, 3, false, true, sparkle)
+
+        let {r, g, b} = sparkle.color
+        if (r > g && r > b)
+          sparkle.color.r = Math.min(255, sparkle.color.r + 15)
+        else if (g > r && g > b)
+          sparkle.color.g = Math.min(255, sparkle.color.g + 15)
+        else
+          sparkle.color.b = Math.min(255, sparkle.color.b + 15)
+        // sparkle.color.r = Math.min(255, sparkle.color.r + 15)
+        // sparkle.color.g = Math.min(255, sparkle.color.g + 15)
+        // sparkle.color.b = Math.min(255, sparkle.color.b + 15)
         
         if (sparkle.counter++ !== sparkle.length)
           updatedSparklesArray.push(sparkle)
@@ -82,11 +107,13 @@ class App extends React.Component {
   onMouseMove = (e) => {
     if (this.sparklerOn === true) {
       let sparkleArray = []
+      let r = Math.floor(Math.random() * 255), g = Math.floor(Math.random() * 255), b = Math.floor(Math.random() * 255)
       for (let i = 0; i < 32; i++) {
         let newSparkleParticle = {
           x: e.type === 'mousedown' || e.type === 'mousemove' ? e.pageX : e.touches[0].pageX,
           y: e.type === 'mousedown' || e.type === 'mousemove' ? e.pageY : e.touches[0].pageY,
-          color: {r: this.state.sliderRedX, g: this.state.sliderGreenX, b: this.state.sliderBlueX},
+          // color: {r: this.state.sliderRedX, g: this.state.sliderGreenX, b: this.state.sliderBlueX},
+          color: {r, g, b},
           length: Math.floor(Math.random() * 10) + 5,
           counter: 0,
           key: this.counter++,
@@ -134,7 +161,7 @@ class App extends React.Component {
             )
           })
         }
-        <Slider
+        {/* <Slider
           axis="x"
           x={this.state.sliderRedX}
           xmax={255}
@@ -192,7 +219,7 @@ class App extends React.Component {
               height: 19
             }
           }}
-        />
+        /> */}
         
         {/* <DrawArea /> */}
       </div>
