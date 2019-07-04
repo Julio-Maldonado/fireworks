@@ -22,7 +22,7 @@ class App extends React.Component {
     path: [], 
     sliderRedX: 240,
     sliderGreenX: 230,
-    sliderBlueX: 240
+    sliderBlueX: 240,
   }
 
   counter = 0
@@ -33,6 +33,8 @@ class App extends React.Component {
 
   componentDidMount() {
     setInterval(this.update, 60)
+    setInterval(() => this.fireworkFlags(true, false), 3000)
+    setInterval(() => this.fireworkFlags(false, true), 3000)
     this.audio = new Audio(FireworksAudio)
     this.audio.volume = 0.5
     this.audio.addEventListener('ended', () => {
@@ -44,6 +46,143 @@ class App extends React.Component {
     // document.body.addEventListener('touchmove', function() {})
     // window.addEventListener('touchmove', function() {})
     document.addEventListener('touchmove', function(e) { e.preventDefault() }, { passive: false })
+  }
+
+  fireworkFlags = (americanFlag, mexicanFlag) => {
+    let sparkleArray = []
+
+    // MEXICAN FLAG
+    // green color
+    let xOffset = 64
+    let yOffset = 128
+    let INCREMENTER = 8
+    let r = 0, g = 104, b = 71
+    let wWidth = (window.innerWidth + Math.floor(Math.random() * window.innerWidth)) % (window.innerWidth - xOffset)
+    let wHeight = (window.innerHeight + Math.floor(Math.random() * window.innerHeight)) % (window.innerHeight - xOffset)
+
+    if (mexicanFlag) {
+      for (let i = 0; i <= xOffset; i+=INCREMENTER) {
+        for (let j = 0; j <= yOffset; j+=INCREMENTER) {
+          let newSparkleParticle = {
+            x: wWidth - xOffset + i,
+            y: wHeight + j,
+            color: {r, g, b},
+            length: Math.floor(Math.random() * 10) + 5,
+            counter: 0,
+            key: this.counter++,
+            quadrant: Math.floor(Math.random() * 8)
+          }
+          sparkleArray.push(newSparkleParticle)
+        }
+      }
+      
+      r = 255
+      g = 255
+      b = 255
+      for (let i = 0; i <= xOffset; i+=INCREMENTER) {
+        for (let j = 0; j <= yOffset; j+=INCREMENTER) {
+          let newSparkleParticle = {
+            x: wWidth + i,
+            y: wHeight + j,
+            color: {r, g, b},
+            length: Math.floor(Math.random() * 10) + 5,
+            counter: 0,
+            key: this.counter++,
+            quadrant: Math.floor(Math.random() * 8)
+          }
+          sparkleArray.push(newSparkleParticle)
+        }
+      }
+  
+      r = 206
+      g = 17
+      b = 38
+      for (let i = 0; i <= xOffset; i+=INCREMENTER) {
+        for (let j = 0; j <= yOffset; j+=INCREMENTER) {
+          let newSparkleParticle = {
+            x: wWidth + xOffset +  i,
+            y: wHeight + j,
+            color: {r, g, b},
+            length: Math.floor(Math.random() * 10) + 5,
+            counter: 0,
+            key: this.counter++,
+            quadrant: Math.floor(Math.random() * 8)
+          }
+          sparkleArray.push(newSparkleParticle)
+        }
+      } 
+    }
+
+    if (americanFlag) {
+      // AMERICAN FLAG
+      // blue
+      wWidth = (window.innerWidth + Math.floor(Math.random() * window.innerWidth) + wWidth) % (window.innerWidth - xOffset)
+      wHeight = (window.innerHeight + Math.floor(Math.random() * window.innerHeight) + wHeight) % (window.innerHeight - xOffset)
+
+      r = 60
+      g = 59
+      b = 110
+
+      // THIS DOES THE BLUE HALF
+      for (let i = 0; i <= xOffset; i+=INCREMENTER) {
+        for (let j = 0; j <= yOffset/2; j+=INCREMENTER) {
+          let newSparkleParticle = {
+            x: wWidth - xOffset + i,
+            y: wHeight + j,
+            color: {r, g, b},
+            length: Math.floor(Math.random() * 10) + 5,
+            counter: 0,
+            key: this.counter++,
+            quadrant: Math.floor(Math.random() * 8)
+          }
+          sparkleArray.push(newSparkleParticle)
+        }
+      }
+
+      // white
+      let red = { r: 178, g: 34, b: 52 }
+      let white = { r: 255, g: 255, b: 255 }
+
+      let flagCounter = 0
+      for (let i = 0; i <= 2*xOffset; i+=INCREMENTER) {
+        for (let j = 0; j <= yOffset/2; j+=INCREMENTER) {
+          let newSparkleParticle = {
+            x: wWidth + i,
+            y: wHeight + j,
+            color: flagCounter++ % 2 === 0 ? red : white,
+            length: Math.floor(Math.random() * 10) + 5,
+            counter: 0,
+            key: this.counter++,
+            quadrant: Math.floor(Math.random() * 8)
+          }
+          sparkleArray.push(newSparkleParticle)
+        }
+      }
+
+      // red
+      r = 178
+      g = 34
+      b = 52
+      for (let i = 0; i <= 3*xOffset; i+=INCREMENTER) {
+        for (let j = yOffset/2; j <= yOffset; j+=INCREMENTER) {
+          let newSparkleParticle = {
+            x: wWidth - xOffset +  i,
+            y: wHeight + j,
+            color: flagCounter++ % 2 === 0 ? red : white,
+            length: Math.floor(Math.random() * 10) + 5,
+            counter: 0,
+            key: this.counter++,
+            quadrant: Math.floor(Math.random() * 8)
+          }
+          sparkleArray.push(newSparkleParticle)
+        }
+      }
+    }
+
+    this.setState({
+      sparkles: [...this.state.sparkles, sparkleArray],
+      // path: [...this.state.path, {x: e.pageX, y: e.pageY, key: this.coordCounter++}]
+    })
   }
 
   onMouseDown = (e) => { 
@@ -94,7 +233,7 @@ class App extends React.Component {
         // sparkle.color.r = Math.min(255, sparkle.color.r + 15)
         // sparkle.color.g = Math.min(255, sparkle.color.g + 15)
         // sparkle.color.b = Math.min(255, sparkle.color.b + 15)
-        
+
         if (sparkle.counter++ !== sparkle.length)
           updatedSparklesArray.push(sparkle)
       })
@@ -123,7 +262,7 @@ class App extends React.Component {
       }
       this.setState({
         sparkles: [...this.state.sparkles, sparkleArray],
-        path: [...this.state.path, {x: e.pageX, y: e.pageY, key: this.coordCounter++}]
+        // path: [...this.state.path, {x: e.pageX, y: e.pageY, key: this.coordCounter++}]
       })
     }
   }
