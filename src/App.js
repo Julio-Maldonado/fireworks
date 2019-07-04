@@ -1,7 +1,6 @@
 import React from 'react'
 import './App.css'
 import {rgbDecTorgbHex} from './helperFunctions'
-import Sound from 'react-sound'
 import FireworksAudio from './assets/trimmedAudio.mp3'
 
 let updateSparkle = (ax, ay, bx, by, op1, op2, sparkle) => {
@@ -32,6 +31,8 @@ class App extends React.Component {
   prevPos = {offsetX: 0, offsetY: 0}
 
   componentDidMount() {
+    document.title = "Fireworks"
+
     setInterval(this.update, 60)
     setInterval(() => this.fireworkFlags(true, false), 3000)
     setInterval(() => this.fireworkFlags(false, true), 3000)
