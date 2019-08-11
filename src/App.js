@@ -3,6 +3,42 @@ import './App.css'
 import {rgbDecTorgbHex} from './helperFunctions'
 import FireworksAudio from './assets/trimmedAudio.mp3'
 
+
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import faGithub from '@fortawesome/fontawesome-free-brands/faGithub';
+import faFacebook from '@fortawesome/fontawesome-free-brands/faFacebookF';
+import faInstagram from '@fortawesome/fontawesome-free-brands/faInstagram';
+import faLinkedinIn from '@fortawesome/fontawesome-free-brands/faLinkedinIn';
+import faEnvelope from '@fortawesome/fontawesome-free-regular/faEnvelope';
+
+const data = [
+	{
+	  link: 'https://github.com/Julio-Maldonado',
+	  label: 'Github',
+	  icon: faGithub,
+	},
+	{
+	  link: 'https://www.facebook.com/julio.maldonado.904',
+	  label: 'Facebook',
+	  icon: faFacebook,
+	},
+	{
+	  link: 'https://www.instagram.com/_julio_maldonado/',
+	  label: 'Instagram',
+	  icon: faInstagram,
+	},
+	{
+	  link: 'https://www.linkedin.com/in/juliom72/',
+	  label: 'LinkedIn',
+	  icon: faLinkedinIn,
+	},
+	{
+	  link: 'mailto:julio.maldonado.guzman@gmail.com',
+	  label: 'Email',
+	  icon: faEnvelope,
+	},
+];
+
 let updateSparkle = (ax, ay, bx, by, op1, op2, sparkle) => {
   if (op1)
     sparkle.x += Math.floor(Math.random() * ax) + bx
@@ -362,6 +398,22 @@ class App extends React.Component {
         /> */}
         
         {/* <DrawArea /> */}
+        <div id="footer">
+          <ul className="icons">
+              {data.map(s => (
+                  <li key={s.label}>
+                      <a href={s.link} target="_blank" rel="noopener noreferrer">
+                          <FontAwesomeIcon icon={s.icon} />
+                      </a>
+                  </li>
+              ))}
+          </ul>
+          <p className="copyright">
+              <a href={"https://juliomaldonado.com"} target="_blank" rel="noopener noreferrer">
+                  juliomaldonado.com
+              </a>
+          </p>
+        </div>
       </div>
     )
   }

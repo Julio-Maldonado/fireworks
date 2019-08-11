@@ -57,6 +57,45 @@
   margin: 0;
 }
 
+#footer {
+  position: absolute;
+  bottom: 10vh;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  margin: 0 auto;
+}
+
+.icons {
+  margin-bottom: 0;
+  width: 100vw;
+  text-align: center;
+  padding: 0;
+  margin: 0;
+}
+
+.copyright a {
+  margin: 0;
+  bottom: 0;
+  color: white;
+}
+
+li {
+  display: inline;
+  *display: inline;
+  *zoom: 1;
+}
+
+li a {
+  white-space: nowrap;
+  color: white;
+}
+
+li:after {
+  content: " ";
+  letter-spacing: 1em;
+  background: center center no-repeat url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAABGdBTUEAALGPC/xhBQAAAAlwSFlzAAAOwAAADsABataJCQAAABl0RVh0U29mdHdhcmUAcGFpbnQubmV0IDQuMC4xMkMEa+wAAAAnSURBVBhXY/Dz89MA4sNA/B9Ka4AEYQIwfBgkiCwAxjhVopnppwEApxQqhnyQ+VkAAAAASUVORK5CYII=);
+}
+
 @keyframes App-logo-spin {
   from {
     transform: rotate(0deg);
@@ -64,4 +103,8 @@
   to {
     transform: rotate(360deg);
   }
+}
+
+@media only screen and (orientation: portrait) {
+  
 }
